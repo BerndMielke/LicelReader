@@ -79,7 +79,9 @@ class LicelFileReader:
      self.GlobalInfo.Longitude = float(self.firstline.split()[6])
      self.GlobalInfo.Latitude = float(self.firstline.split()[7])
      self.GlobalInfo.Zenith = float(self.firstline.split()[8])
-     self.GlobalInfo.Azimuth = float(self.firstline.split()[9])
+     if (len(self.firstline.split()) > 10): 
+        self.GlobalInfo.Azimuth = float(self.firstline.split()[9])
+        
      self.GlobalInfo.numShotsL0  = int(self.secondline.split()[0])
      self.GlobalInfo.repRateL0  = int(self.secondline.split()[1])
      self.GlobalInfo.numShotsL1  = int(self.secondline.split()[2])
@@ -88,10 +90,12 @@ class LicelFileReader:
      #self.GlobalInfo.numShotsL2  = int(self.secondline.split()[5])
      #self.GlobalInfo.repRateL2  = int(self.secondline.split()[6])
      for i in range(self.GlobalInfo.numDataSets):
-       self.varline = str(fp.read(80), encoding)
+       self.varline = str(fp.readline(), encoding)
        self.dataSet.append(dataSet(self.varline))
+     fp.readline()
      for i in range(self.GlobalInfo.numDataSets):
-       fp.read(2)
+       if (i > 0):
+        fp.read(2)
        self.dataSet[i].rawData = np.fromfile(fp, dtype=int, count = self.dataSet[i].numBins)
        if (self.dataSet[i].dataType == 0):
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
