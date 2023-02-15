@@ -50,12 +50,12 @@ class dataSet:
       self.numBins     = int(stringIn.split()[3])
       self.laserPolarization = int(stringIn.split()[4])
       self.highVoltage = int(stringIn.split()[5])
-      self.binwidth = float(stringIn.split()[6])
+      (self.binwidth) = float(stringIn.split()[6])
       self.LaserWavelength = int(stringIn.split()[7].split('.')[0])
       self.binshift = int(stringIn.split()[8])
       self.ADCBits = int(stringIn.split()[12])
       self.numShots = int(stringIn.split()[13])
-      if (self.dataType == 0):
+      if ((self.dataType == 0) or (self.dataType == 2)):
         self.inputRange = float(stringIn.split()[14])
       else: 
         self.discriminator = float(stringIn.split()[14])
@@ -97,9 +97,18 @@ class LicelFileReader:
        if (i > 0):
         fp.read(2)
        self.dataSet[i].rawData = np.fromfile(fp, dtype=int, count = self.dataSet[i].numBins)
-       if (self.dataSet[i].dataType == 0):
+       if (self.dataSet[i].dataType == 0): #analog
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          self.dataSet[i].physData = self.dataSet[i].inputRange * self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) /maxbits
+       elif (self.dataSet[i].dataType == 1): # pc
+         self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) * (150 / self.dataSet[i].binwidth)
+       elif (self.dataSet[i].dataType == 2): # analog sqr
+         maxbits = (2 ** self.dataSet[i].ADCBits) - 1
+         n = (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
+         sq_n_1 = np.sqrt(self.dataSet[i].numShots -1) if (self.dataSet[i].numShots > 1) else 1
+         self.dataSet[i].physData = self.dataSet[i].inputRange * self.dataSet[i].rawData /(n * sq_n_1) /maxbits 
+       elif (self.dataSet[i].dataType == 3): # pc sqr
+         self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) * (150 / self.dataSet[i].binwidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
        else :
          self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
      fp.close()
