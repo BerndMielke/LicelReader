@@ -68,8 +68,8 @@ class LicelFileReader:
      self.GlobalInfo = GlobalInfo
      self.dataSet = []
      fp = open(filename, 'rb')
-     self.GlobalInfo.filename = str(fp.readline()).split()[0]
      encoding = 'utf-8'
+     self.GlobalInfo.filename = str(fp.readline(), encoding).split()[0];
      self.firstline = str(fp.readline(), encoding)
      self.secondline = str(fp.readline(), encoding)
      self.GlobalInfo.Location  = self.firstline.split()[0]
