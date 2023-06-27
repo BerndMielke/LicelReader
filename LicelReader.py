@@ -93,7 +93,7 @@ class LicelFileReader:
      for i in range(self.GlobalInfo.numDataSets):
        fp.read(2)
        self.dataSet[i].rawData = np.fromfile(fp, dtype=int, count = self.dataSet[i].numBins)
-       if (self.dataSet[i].dataType == 0):
+       if ((self.dataSet[i].dataType == 0) and (self.dataSet[i].ADCBits > 1)):
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          self.dataSet[i].physData = self.dataSet[i].inputRange * self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) /maxbits
        else :
