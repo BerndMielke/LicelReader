@@ -38,10 +38,7 @@ class dataSet:
     descriptor = ''
     rawData  = np.zeros((3,))
     physData = np.zeros((3,))
-    def offset_correction(self, start, stop):
-      arr = self.physData[start:stop] 
-      return self.physData - np.mean(arr) 
-
+    
   
     def __init__(self, stringIn):
       self.active = int(stringIn.split()[0]) 
