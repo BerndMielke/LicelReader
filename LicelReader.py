@@ -19,6 +19,14 @@ class GlobalInfo:
     numShotsL2 = 0
     repRateL2 = 0
     numDataSets = 0
+    def getDescString(self):
+        desc = str(self.filename) + \
+              "\nstart:    " + str(self.StartTime) + \
+              "\nstop:     " + str(self.StopTime) + \
+              "\nShots L0: " + str(self.numShotsL0) + \
+              "\nShots L1: " + str(self.numShotsL1)
+        return desc
+       
 class dataSet:
     active = 0
     dataType = 0
@@ -28,7 +36,7 @@ class dataSet:
     highVoltage = 0
     binWidth = 0.0
     LaserWavelength = 0.0
-    Polarisation = 'o'
+    Polarization = 'o'
     binshift = 0
     binshiftPart = 0
     ADCBits = 0
@@ -49,6 +57,7 @@ class dataSet:
       self.highVoltage = int(stringIn.split()[5])
       (self.binwidth) = float(stringIn.split()[6])
       self.LaserWavelength = int(stringIn.split()[7].split('.')[0])
+      self.Polarization = stringIn.split()[7].split('.')[1]
       self.binshift = int(stringIn.split()[8])
       self.ADCBits = int(stringIn.split()[12])
       self.numShots = int(stringIn.split()[13])
@@ -57,7 +66,24 @@ class dataSet:
       else: 
         self.discriminator = float(stringIn.split()[14])
       self.descriptor = stringIn.split()[15]
-    
+    def getDescString(self):
+      if (self.dataType == 1): 
+        desc = "Photon Bins: " + str(self.numBins) + \
+             "\nbinWidth:    " + str(self.binwidth) + \
+             "\nShots:       " + str(self.numShots) + \
+             "\ndiscr:       " + str(63 * self.discriminator/ 25.0)
+      else:
+        desc = "Analog Bins: " + str(self.numBins) + \
+             "\nbinWidth:    " + str(self.binwidth) + \
+             "\nShots:       " + str(self.numShots) + \
+             "\nADC:         " + str(self.ADCBits) + \
+             "\nInput:       " + str(self.inputRange * 1000) + "mV" 
+      desc += "\nHV:          " + str(self.highVoltage) + "V" + \
+              "\nPol.:        " + self.Polarization
+      return desc
+
+
+         
 
 
 class LicelFileReader:
