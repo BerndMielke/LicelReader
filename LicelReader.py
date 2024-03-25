@@ -88,7 +88,7 @@ class dataSet:
 
 class LicelFileReader:
   def __init__(self, filename):
-     self.GlobalInfo = GlobalInfo
+     self.GlobalInfo = GlobalInfo()
      self.dataSet = []
      fp = open(filename, 'rb')
      encoding = 'utf-8'
