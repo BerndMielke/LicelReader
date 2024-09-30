@@ -35,7 +35,7 @@ class dataSet:
     laserPolarization = 0
     highVoltage = 0
     binWidth = 0.0
-    LaserWavelength = 0.0
+    wavelength = 0.0
     Polarization = 'o'
     binshift = 0
     binshiftPart = 0
@@ -56,7 +56,7 @@ class dataSet:
       self.laserPolarization = int(stringIn.split()[4])
       self.highVoltage = int(stringIn.split()[5])
       (self.binwidth) = float(stringIn.split()[6])
-      self.LaserWavelength = int(stringIn.split()[7].split('.')[0])
+      self.wavelength = int(stringIn.split()[7].split('.')[0])
       self.Polarization = stringIn.split()[7].split('.')[1]
       self.binshift = int(stringIn.split()[8])
       self.ADCBits = int(stringIn.split()[12])
