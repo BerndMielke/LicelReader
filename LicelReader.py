@@ -120,20 +120,26 @@ class LicelFileReader:
        if (i > 0):
         fp.read(2)
        self.dataSet[i].rawData = np.fromfile(fp, dtype=int, count = self.dataSet[i].numBins)
+
+       scale = 1.0 / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1);
        if ((self.dataSet[i].dataType == 0) and (self.dataSet[i].ADCBits > 1)): #analog
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
-         self.dataSet[i].physData = self.dataSet[i].inputRange * self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) /maxbits
+         scale *= self.dataSet[i].inputRange / maxbits
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData
        elif (self.dataSet[i].dataType == 1): # pc
-         self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) * (150 / self.dataSet[i].binwidth)
+         scale *= (150 / self.dataSet[i].binwidth)
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        elif (self.dataSet[i].dataType == 2): # analog sqr
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          n = (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
          sq_n_1 = np.sqrt(self.dataSet[i].numShots -1) if (self.dataSet[i].numShots > 1) else 1
-         self.dataSet[i].physData = self.dataSet[i].inputRange * self.dataSet[i].rawData /(n * sq_n_1) /maxbits 
+         scale = self.dataSet[i].inputRange /(n * sq_n_1) /maxbits 
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData 
        elif (self.dataSet[i].dataType == 3): # pc sqr
-         self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1) * (150 / self.dataSet[i].binwidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
+         scale *= (150 / self.dataSet[i].binwidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        else :
-         self.dataSet[i].physData = self.dataSet[i].rawData / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData
      fp.close()
 
 
