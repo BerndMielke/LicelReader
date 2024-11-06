@@ -55,7 +55,7 @@ class dataSet:
       self.numBins     = int(stringIn.split()[3])
       self.laserPolarization = int(stringIn.split()[4])
       self.highVoltage = int(stringIn.split()[5])
-      (self.binwidth) = float(stringIn.split()[6])
+      (self.binWidth) = float(stringIn.split()[6])
       self.wavelength = int(stringIn.split()[7].split('.')[0])
       self.Polarization = stringIn.split()[7].split('.')[1]
       self.binshift = int(stringIn.split()[8])
@@ -69,12 +69,12 @@ class dataSet:
     def getDescString(self):
       if (self.dataType == 1): 
         desc = "Photon Bins: " + str(self.numBins) + \
-             "\nbinWidth:    " + str(self.binwidth) + \
+             "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\ndiscr:       " + str(63 * self.discriminator/ 25.0)
       else:
         desc = "Analog Bins: " + str(self.numBins) + \
-             "\nbinWidth:    " + str(self.binwidth) + \
+             "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\nADC:         " + str(self.ADCBits) + \
              "\nInput:       " + str(self.inputRange * 1000) + "mV" 
@@ -127,7 +127,7 @@ class LicelFileReader:
          scale *= self.dataSet[i].inputRange / maxbits
          self.dataSet[i].physData = scale * self.dataSet[i].rawData
        elif (self.dataSet[i].dataType == 1): # pc
-         scale *= (150 / self.dataSet[i].binwidth)
+         scale *= (150 / self.dataSet[i].binWidth)
          self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        elif (self.dataSet[i].dataType == 2): # analog sqr
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
@@ -136,7 +136,7 @@ class LicelFileReader:
          scale = self.dataSet[i].inputRange /(n * sq_n_1) /maxbits 
          self.dataSet[i].physData = scale * self.dataSet[i].rawData 
        elif (self.dataSet[i].dataType == 3): # pc sqr
-         scale *= (150 / self.dataSet[i].binwidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
+         scale *= (150 / self.dataSet[i].binWidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
          self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        else :
          self.dataSet[i].physData = scale * self.dataSet[i].rawData
