@@ -119,7 +119,7 @@ class LicelFileReader:
      for i in range(self.GlobalInfo.numDataSets):
        if (i > 0):
         fp.read(2)
-       self.dataSet[i].rawData = np.fromfile(fp, dtype=int, count = self.dataSet[i].numBins)
+       self.dataSet[i].rawData = np.fromfile(fp, dtype=np.int32, count = self.dataSet[i].numBins)
 
        scale = 1.0 / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1);
        if ((self.dataSet[i].dataType == 0) and (self.dataSet[i].ADCBits > 1)): #analog
