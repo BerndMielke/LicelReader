@@ -140,6 +140,11 @@ class LicelFileReader:
          self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        else :
          self.dataSet[i].physData = scale * self.dataSet[i].rawData
+     term = fp.read(2) #read the terminating CRLF
+     if (term != '\r\n') :
+       print('wrong termination')
+     else :
+       print ('file complete')
      fp.close()
 
 
