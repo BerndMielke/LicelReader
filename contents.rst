@@ -6,12 +6,24 @@
 LicelReader documentation
 =========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+**LicelReader**  is a Python library to read data file in the Licel file format <https://licel.com/raw_data_format.html> 
+
+.. note::
+
+   This project is under active development.
+
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+.. toctree::
+   :maxdepth: 1
+
+   docs/LicelReader.rst
+
+.. * :ref:`genindex`
+
+
 
