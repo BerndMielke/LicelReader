@@ -5,8 +5,9 @@ import os
 
 def offset_correction(physData: np.ndarray, start: int,
                        stop : int) ->  np.ndarray:
-      """ return a smoothed array based on the data input
-
+      """ 
+      return an offset corrected array based on the data input
+      
       Parameters
       ----------
       physData: np.ndarray

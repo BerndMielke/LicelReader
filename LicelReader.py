@@ -2,23 +2,25 @@ import numpy as np
 import os
 
 class GlobalInfo:
-    filename = ''
-    Location = ''
-    StartTime = ''
-    StopTime = ''
-    Height = 0
-    Longitude = 0.0
-    Latitude = 0.0
-    Zenith = 0.0
-    Azimuth = 0.0
-    Custom = ''
-    numShotsL0 = 0
-    repRateL0 = 0
-    numShotsL1 = 0
-    repRateL1 = 0
-    numShotsL2 = 0
-    repRateL2 = 0
-    numDataSets = 0
+    """ The measurement situation is described in this class
+    """
+    filename  : str  = '' #: name of the file when it was written
+    Location  : str  = '' #: measurement site
+    StartTime : str = ''  #: measurement start hh:mm:ss
+    StopTime  : str = ''  #: measurement end hh:mm:ss
+    Height : float = 0    #:altitude above sea level  
+    Longitude : float = 0.0 #: longitude in degrees
+    Latitude  : float = 0.0 #: latitude in degrees
+    Zenith : float = 0.0    #: Zenith angle of the beam in degrees
+    Azimuth : float = 0.0   #: Azimuth angle of the beam in degrees
+    Custom : str = ''       #: optional custom information field
+    numShotsL0 : int = 0 #: number of laser shots of the first laser
+    repRateL0 : int  = 0 #: repetition rate of the first laser
+    numShotsL1 : int = 0 #: number of laser shots of the second laser
+    repRateL1 : int  = 0 #: repetition rate of the second laser
+    numShotsL2 : int = 0 #: number of laser shots of the third laser
+    repRateL2 : int  = 0 #: repetition rate of the third laser
+    numDataSets : int = 0 # number of variable datasets in the `dataset` array
     def getDescString(self):
         desc = str(self.filename) + \
               "\nstart:    " + str(self.StartTime) + \
