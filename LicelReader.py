@@ -20,9 +20,10 @@ class GlobalInfo:
     repRateL1 : int  = 0 #: repetition rate of the second laser
     numShotsL2 : int = 0 #: number of laser shots of the third laser
     repRateL2 : int  = 0 #: repetition rate of the third laser
-    numDataSets : int = 0 # number of variable datasets in the `dataset` array
-    def getDescString(self):
+    numDataSets : int = 0 #: number of variable datasets in the `dataset` array
+    def getDescString(self): #: data file description string
         desc = str(self.filename) + \
+              "\ndatasets: " + str(self.numDataSets) + \
               "\nstart:    " + str(self.StartTime) + \
               "\nstop:     " + str(self.StopTime) + \
               "\nShots L0: " + str(self.numShotsL0) + \
@@ -30,24 +31,52 @@ class GlobalInfo:
         return desc
        
 class dataSet:
-    active = 0
-    dataType = 0
-    laserSource = 0
-    numBins = 0 
-    laserPolarization = 0
-    highVoltage = 0
-    binWidth = 0.0
-    wavelength = 0.0
-    Polarization = 'o'
-    binshift = 0
-    binshiftPart = 0
-    ADCBits = 0
-    numShots = 0
-    inputRange = 0.5
-    discriminator = 0.003
-    descriptor = ''
-    rawData  = np.zeros((3,))
-    physData = np.zeros((3,))
+    active :      int = 0 #: 1 for active data sets , 0 for skipped data sets
+    dataType :    int = 0 
+    """"
+        0 Analog, 1 Photon Counting, 2 Analog squared, 
+        3 Photon Counting squared,  4 Power Meter dataset, 5 Overflow dataset
+    """
+    laserSource : int = 0 #: which laser is the source, valid values 0, 1, 2
+    numBins : int = 0 #: number of data points
+    laserPolarization : int = 0 
+    """
+      the laser polarization 0 (none, vertical, horizontal, right circular, left circular) 0|1|2|3|4
+    """
+    highVoltage : int = 0 #: High voltage of the PM or APD in V 
+    binWidth : float = 0.0 #: width of single bin in m
+    wavelength : float = 0.0 #: detection wavelength in nm
+    Polarization : str = 'o'
+    """
+      polarization status (none, parallel, crossed, right circular, left circular) o|p|s|r|l
+    """
+    binshift : int = 0
+    """
+      bin shift, whole-number (primary bins, integer rounded down, 2 digits, 00 if not supported or zero)
+    """
+    binshiftPart : int = 0
+    """
+      decimal places of the bin shift (3 digits, 000 if not supported or zero)
+    """
+    ADCBits : int = 0 #: the number of bits of the ADC
+    numShots :int = 0 #: the number of accumulated shots
+    inputRange : float = 0.5 
+    """Analog input range in V valid values 0.02, 0.1, 0.5
+    """
+    discriminator : float = 0.003 #: photon counting discriminator level in V 
+    descriptor : str = ''
+    """
+    device identificator
+    BT 	analog dataset
+    BC 	photon counting
+    S2A  	s sqrt(N(N-1)) (analog, s sample standard deviation, N shots)
+    S2P  	s sqrt(N(N-1)) (photon counting, s sample standard deviation, N shots)
+    PD 	powermeter (photodiode)
+    PM 	powermeter (powermeter)
+    OF 	overflow
+    """
+    rawData : np.ndarray = np.zeros((3,)) #: binary raw sum 
+    physData : np.ndarray = np.zeros((3,)) #: scaled to physical values
     
   
     def __init__(self, stringIn):
@@ -68,7 +97,7 @@ class dataSet:
       else: 
         self.discriminator = float(stringIn.split()[14])
       self.descriptor = stringIn.split()[15]
-    def getDescString(self):
+    def getDescString(self): #: data set description string
       if (self.dataType == 1): 
         desc = "Photon Bins: " + str(self.numBins) + \
              "\nbinWidth:    " + str(self.binWidth) + \
