@@ -60,6 +60,9 @@ def downsampling(data: np.ndarray, exponent: int) -> np.ndarray :
             downsampled array
       """
       oversampling_Factor = 1 << exponent
-      y = np.split(oversampling_Factor)
+      max_size = data.size
+      pieces = np.floor_divide(max_size, oversampling_Factor)
+      new_size = pieces * oversampling_Factor
+      y = np.split(data[0:new_size], pieces)
       return np.sum(y, axis = 1)
 

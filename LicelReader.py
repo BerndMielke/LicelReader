@@ -98,18 +98,41 @@ class dataSet:
         self.discriminator = float(stringIn.split()[14])
       self.descriptor = stringIn.split()[15]
     def getDescString(self): #: data set description string
-      if (self.dataType == 1): 
-        desc = "Photon Bins: " + str(self.numBins) + \
-             "\nbinWidth:    " + str(self.binWidth) + \
-             "\nShots:       " + str(self.numShots) + \
-             "\ndiscr:       " + str(63 * self.discriminator/ 25.0)
-      else:
-        desc = "Analog Bins: " + str(self.numBins) + \
+      match self.dataType:
+        case 0:
+          desc = "Analog Bins: " + str(self.numBins) + \
              "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\nADC:         " + str(self.ADCBits) + \
              "\nInput:       " + str(self.inputRange * 1000) + "mV" 
-      desc += "\nHV:          " + str(self.highVoltage) + "V" + \
+        case 1:
+          desc = "Photon Bins: " + str(self.numBins) + \
+              "\nbinWidth:    " + str(self.binWidth) + \
+              "\nShots:       " + str(self.numShots) + \
+              "\ndiscr:       " + str(int(round(63 * self.discriminator/ 25.0)))
+        case 2:
+          desc = "Analog  Square Bins: " + str(self.numBins) + \
+             "\nbinWidth:    " + str(self.binWidth) + \
+             "\nShots:       " + str(self.numShots) + \
+             "\nADC:         " + str(self.ADCBits) + \
+             "\nInput:       " + str(self.inputRange * 1000) + "mV"
+        case 3:
+          desc = "Photon Square Bins: " + str(self.numBins) + \
+              "\nbinWidth:    " + str(self.binWidth) + \
+              "\nShots:       " + str(self.numShots) + \
+              "\ndiscr:       " + str(int(round(63 * self.discriminator/ 25.0)))
+        case 4:
+          desc = "Powermeter shots: " + str(self.numBins)
+        case 5:
+          desc = "Analog Overflow: " + str(self.numBins)
+        case _: 
+          desc = "Analog Bins: " + str(self.numBins) + \
+             "\nbinWidth:    " + str(self.binWidth) + \
+             "\nShots:       " + str(self.numShots) + \
+             "\nADC:         " + str(self.ADCBits) + \
+             "\nInput:       " + str(self.inputRange * 1000) + "mV" 
+      if (self.dataType < 4) :
+        desc += "\nHV:          " + str(self.highVoltage) + "V" + \
               "\nPol.:        " + self.Polarization
       return desc
 
