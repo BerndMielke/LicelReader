@@ -66,3 +66,43 @@ def downsampling(data: np.ndarray, exponent: int) -> np.ndarray :
       y = np.split(data[0:new_size], pieces)
       return np.sum(y, axis = 1)
 
+def deadtime_correction(pc_MHz: np.ndarray, deadtime_ns : float) -> np.ndarray :
+      """ return the dead time corrected photon counting data using the non paralyzable model  
+
+      Parameters
+      ----------
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz
+      deadtime_ns : float
+            The dead time of the detection system, typical values are 3.08 ns
+
+      Returns
+      -------
+      np.ndarray :
+            dead time corrected photon counting data in MHz
+      """
+      max_count_rate = np.max(pc_MHz)
+      if (max_count_rate * deadtime_ns * 0.001 >= 1) :
+            raise ValueError('dead time too large')
+      return pc_MHz /(1 - pc_MHz  * deadtime_ns * 0.001)
+
+def analog_to_pc_scale(analog: np.ndarray, pc_MHz: np.ndarray, start : int, stop : int) -> list[float] :
+      """ find the scaling coefficients to match the analog array to the photon counting array between the start and the stop index
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      start: int
+            Start index for the scaling region
+      stop: int
+            Stop index for the scaling region
+      Returns
+      -------
+      list[float] :
+            fit coefficients, scale is at index 0, offset at index 1
+      """
+      m, b = np.polyfit(analog[start:stop], pc_MHz[start:stop], deg=1)
+      return([m,b])
+
