@@ -105,4 +105,41 @@ def analog_to_pc_scale(analog: np.ndarray, pc_MHz: np.ndarray, start : int, stop
       """
       m, b = np.polyfit(analog[start:stop], pc_MHz[start:stop], deg=1)
       return([m,b])
+def binshift(analog: np.ndarray, pc_MHz: np.ndarray, 
+             binshift : int) -> list[np.ndarray]:
+      """
+      shift the analog data versus the photon counting data
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      binshift: int
+            if binshift is larger than 0 the first binshift bins will be removed from  the analog data and the last bisnhift bins will be removed from the photon counting so that both are reduced equally in size.
+            if the binshift is negative the first bins will be removed from the photon counting
+            if the binshift is negative both arrays will be  unchanged.
+      Returns
+      -------
+      list[np.ndarray] :
+            realigned arrays [analog, pc]
+      """
+def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray, 
+             skip_bins : int) -> list[np.ndarray]:
+      """
+      skip the first bins that might disturb the gluing process due to analog noise.
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      skip_bin: int
+            if binshift is larger than 0 the first binshift bins will be removed from  the analog data photon counting 
+            if the binshift is negative or 0 both arrays will be  unchanged.
+      Returns
+      -------
+      list[np.ndarray] :
+            realigned arrays [analog, pc]
+      """
 
