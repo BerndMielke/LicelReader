@@ -1,5 +1,7 @@
 import numpy as np
 import os
+from enum import Enum, auto
+
 
 
 
@@ -105,7 +107,8 @@ def analog_to_pc_scale(analog: np.ndarray, pc_MHz: np.ndarray, start : int, stop
       """
       m, b = np.polyfit(analog[start:stop], pc_MHz[start:stop], deg=1)
       return([m,b])
-def binshift(analog: np.ndarray, pc_MHz: np.ndarray, 
+
+def bin_shift(analog: np.ndarray, pc_MHz: np.ndarray, 
              binshift : int) -> list[np.ndarray]:
       """
       shift the analog data versus the photon counting data
@@ -116,7 +119,7 @@ def binshift(analog: np.ndarray, pc_MHz: np.ndarray,
       pc_MHz : np.ndarray
             photon counting array as observed in MHz, this should be the dead time corrected values
       binshift: int
-            if binshift is larger than 0 the first binshift bins will be removed from  the analog data and the last bisnhift bins will be removed from the photon counting so that both are reduced equally in size.
+            if binshift is larger than 0 the first binshift bins will be removed from  the analog data and the last binshift bins will be removed from the photon counting so that both are reduced equally in size.
             if the binshift is negative the first bins will be removed from the photon counting
             if the binshift is negative both arrays will be  unchanged.
       Returns
@@ -124,6 +127,18 @@ def binshift(analog: np.ndarray, pc_MHz: np.ndarray,
       list[np.ndarray] :
             realigned arrays [analog, pc]
       """
+      if binshift > 0 :
+            analog_shifted = analog[binshift:]
+            pc_shifted = pc_MHz[0 : pc_MHz.size - binshift]
+      elif binshift < 0:
+            analog_shifted = analog[0 : pc_MHz.size + binshift]
+            pc_shifted = pc_MHz[-binshift:]
+      else :
+            analog_shifted = analog
+            pc_shifted = pc_MHz
+      return ([analog_shifted, pc_shifted])
+
+      
 def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray, 
              skip_bins : int) -> list[np.ndarray]:
       """
@@ -142,4 +157,59 @@ def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray,
       list[np.ndarray] :
             realigned arrays [analog, pc]
       """
+      analog_shifted = analog[skip_bins:]
+      pc_shifted = pc_MHz[skip_bins]
+      return ([analog_shifted, pc_shifted])
 
+class GluingStrategy(Enum):
+      """ Enum for the results of the gluing strategy check"""
+      INVALID          = auto()  #: one of the inputs signals is invalid 
+      SIGNAL_TOO_LARGE = auto()  
+      """ The minimum  of the photon counting data  is larger than the  max_toggle rate, use the analog in this case
+      """ 
+      SIGNAL_TOO_WEAK  = auto() 
+      """ the maximum of the photon counting data is smaller than the 
+      the minimum toggle rate, use the the photon counting in this case
+      """
+      BACKGROUND       = auto()
+      """ The minimum of the photon counting data does exceeds the min toggle rate, there will be no improvement for the dynamic range from the photon counting, use the analog in this case
+      """
+      GLUE_PROFILES    = auto() 
+      """ both signals are valid and the minimum of the photon counting is below the minimum toggle rate and the maximum is above the max toggle 
+      rate
+      """
+def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray, 
+                           min_toggle : float, max_toggle : float) -> GluingStrategy :
+      """ check if the profiles can be glued
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      min_toggle: float
+            count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      max_toggle: float
+            count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      Returns
+      -------
+      GluingStrategy :
+            result of the gluing strategy check
+      """
+      if analog.size <= 0 :
+            return GluingStrategy.INVALID
+      if pc_MHz.size <= 0 :
+            return GluingStrategy.INVALID
+      pc_max = np.max(pc_MHz)
+      pc_min = np.min(pc_MHz)
+      if pc_max > 1000 :
+            return GluingStrategy.INVALID
+      if pc_min < 0 :
+            return GluingStrategy.INVALID
+      if pc_min > max_toggle :
+            return GluingStrategy.SIGNAL_TOO_LARGE
+      if pc_max < min_toggle :
+            return GluingStrategy.SIGNAL_TOO_WEAK
+      if pc_min > min_toggle :
+            return GluingStrategy.BACKGROUND
+      return GluingStrategy.GLUE_PROFILES
