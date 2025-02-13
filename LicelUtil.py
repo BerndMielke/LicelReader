@@ -25,6 +25,7 @@ def offset_correction(physData: np.ndarray, start: int,
       np.ndarray:
             offset corrected numpy array
       """
+      
       arr = physData[start:stop] 
       return physData - np.mean(arr)
 
@@ -51,12 +52,14 @@ def downsampling(data: np.ndarray, exponent: int) -> np.ndarray :
       """
       accumulating the array in steps of 0  no accumulation, 1 add two bins
       2 add 4 bins...
+
       Parameters
       ----------
       data : np.ndarray
             data input array 
       exponent: int
             how many accumulation steps are needed
+      
       Returns
       -------
       np.ndarray :
@@ -91,6 +94,7 @@ def deadtime_correction(pc_MHz: np.ndarray, deadtime_ns : float) -> np.ndarray :
 
 def analog_to_pc_scale(analog: np.ndarray, pc_MHz: np.ndarray, start : int, stop : int) -> list[float] :
       """ find the scaling coefficients to match the analog array to the photon counting array between the start and the stop index
+
       Parameters
       ----------
       analog: np.array
@@ -101,6 +105,7 @@ def analog_to_pc_scale(analog: np.ndarray, pc_MHz: np.ndarray, start : int, stop
             Start index for the scaling region
       stop: int
             Stop index for the scaling region
+      
       Returns
       -------
       list[float] :
@@ -113,6 +118,7 @@ def bin_shift(analog: np.ndarray, pc_MHz: np.ndarray,
              binshift : int) -> list[np.ndarray]:
       """
       shift the analog data versus the photon counting data
+
       Parameters
       ----------
       analog: np.array
@@ -123,6 +129,7 @@ def bin_shift(analog: np.ndarray, pc_MHz: np.ndarray,
             if binshift is larger than 0 the first binshift bins will be removed from  the analog data and the last binshift bins will be removed from the photon counting so that both are reduced equally in size.
             if the binshift is negative the first bins will be removed from the photon counting
             if the binshift is negative both arrays will be  unchanged.
+      
       Returns
       -------
       list[np.ndarray] :
@@ -144,6 +151,7 @@ def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray,
              skip_bins : int) -> list[np.ndarray]:
       """
       skip the first bins that might disturb the gluing process due to analog noise.
+
       Parameters
       ----------
       analog: np.array
@@ -153,6 +161,7 @@ def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray,
       skip_bins: int
             if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
             if the `skip_bins` is negative or 0 both arrays will be  unchanged.
+      
       Returns
       -------
       list[np.ndarray] :
@@ -184,6 +193,7 @@ class GluingStrategy(Enum):
 def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray, 
                            min_toggle : float, max_toggle : float) -> GluingStrategy :
       """ check if the profiles can be glued
+
       Parameters
       ----------
       analog: np.array
@@ -194,6 +204,7 @@ def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray,
             count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
       max_toggle: float
             count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      
       Returns
       -------
       GluingStrategy :
@@ -221,6 +232,7 @@ def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
                   min_toggle : float, max_toggle : float, skip_bins: int = 0) -> list[np.ndarray] :
       """ mask in both profiles as Nan when the photon counting is outside 
       the min_toggle - max_toggle - range and compress the arrays so that only data points that are inside the range are returned
+
       Parameters
       ----------
       analog: np.array
@@ -234,7 +246,9 @@ def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
       skip_bins: int
             if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
             if the `skip_bins` is negative or 0 both arrays will be  unchanged.
+      
       Returns
+      -------
       list[np.ndarray] :
             compressed  arrays [analog, pc]
       """
@@ -248,6 +262,7 @@ def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
 def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
                   min_toggle : float, max_toggle : float, skip_bins: int = 0) -> np.ndarray :
       """ get the glued profile
+
       Parameters
       ----------
       analog: np.array
@@ -261,10 +276,11 @@ def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
       skip_bins: int
             if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
             if the `skip_bins` is negative or 0 both arrays will be  unchanged.
+      
       Returns
+      -------
       np.ndarray :
             glued profile in MHz
-      -------
       """
       [analog_compressed, pc_compressed] = mask_profiles(analog, pc_MHz, min_toggle, max_toggle, skip_bins)
       [m,b] = analog_to_pc_scale(analog_compressed, pc_compressed, 0, pc_compressed.size)
