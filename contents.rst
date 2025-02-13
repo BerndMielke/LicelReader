@@ -18,12 +18,9 @@ LicelReader documentation
    :maxdepth: 2
    :caption: Contents:
 
-.. toctree::
-   :maxdepth: 1
-
    docs/LicelReader.rst
 
-.. * :ref:`genindex`
+   genindex.rst
 
 
 
