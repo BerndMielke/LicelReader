@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 import os
 from enum import Enum, auto
 
@@ -213,3 +214,39 @@ def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray,
       if pc_min > min_toggle :
             return GluingStrategy.BACKGROUND
       return GluingStrategy.GLUE_PROFILES
+
+def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
+                  min_toggle : float, max_toggle : float) -> list[np.ndarray] :
+      """ mask in both profiles as Nan when the photon counting is outside 
+      the min_toggle - max_toggle - range
+      """
+      pc_masked = ma.masked_outside(pc_MHz, min_toggle, max_toggle)
+      analog_masked = ma.masked_where(pc_masked.mask, analog)
+      pc_compressed = pc_masked.compressed()
+      analog_compressed = analog_masked.compressed()
+      return ([analog_compressed, pc_compressed])
+
+def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
+                  min_toggle : float, max_toggle : float) -> np.ndarray :
+      """ get the glued profile
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      min_toggle: float
+            count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      max_toggle: float
+            count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      Returns
+      np.ndarray :
+            glued profile in MHz
+      -------
+      """
+      [analog_compressed, pc_compressed] = mask_profiles(analog, pc_MHz, min_toggle, max_toggle)
+      [m,b] = analog_to_pc_scale(analog_compressed, pc_compressed, 0, pc_compressed.size)
+      analog_scaled =  m * analog + b
+      use_analog = 1 *  (pc_MHz > max_toggle)
+      return use_analog * analog_scaled + (1 - use_analog) * pc_MHz
+
