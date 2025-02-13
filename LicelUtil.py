@@ -150,14 +150,16 @@ def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray,
             array of the analog data
       pc_MHz : np.ndarray
             photon counting array as observed in MHz, this should be the dead time corrected values
-      skip_bin: int
-            if binshift is larger than 0 the first binshift bins will be removed from  the analog data photon counting 
-            if the binshift is negative or 0 both arrays will be  unchanged.
+      skip_bins: int
+            if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
+            if the `skip_bins` is negative or 0 both arrays will be  unchanged.
       Returns
       -------
       list[np.ndarray] :
             realigned arrays [analog, pc]
       """
+      if skip_bins < 0 :
+         skip_bins = 0    
       analog_shifted = analog[skip_bins:]
       pc_shifted = pc_MHz[skip_bins]
       return ([analog_shifted, pc_shifted])
@@ -216,18 +218,35 @@ def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray,
       return GluingStrategy.GLUE_PROFILES
 
 def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
-                  min_toggle : float, max_toggle : float) -> list[np.ndarray] :
+                  min_toggle : float, max_toggle : float, skip_bins: int = 0) -> list[np.ndarray] :
       """ mask in both profiles as Nan when the photon counting is outside 
-      the min_toggle - max_toggle - range
+      the min_toggle - max_toggle - range and compress the arrays so that only data points that are inside the range are returned
+      Parameters
+      ----------
+      analog: np.array
+            array of the analog data
+      pc_MHz : np.ndarray
+            photon counting array as observed in MHz, this should be the dead time corrected values
+      min_toggle: float
+            count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      max_toggle: float
+            count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      skip_bins: int
+            if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
+            if the `skip_bins` is negative or 0 both arrays will be  unchanged.
+      Returns
+      list[np.ndarray] :
+            compressed  arrays [analog, pc]
       """
       pc_masked = ma.masked_outside(pc_MHz, min_toggle, max_toggle)
+      pc_masked[0: skip_bins] = ma.masked
       analog_masked = ma.masked_where(pc_masked.mask, analog)
       pc_compressed = pc_masked.compressed()
       analog_compressed = analog_masked.compressed()
       return ([analog_compressed, pc_compressed])
 
 def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
-                  min_toggle : float, max_toggle : float) -> np.ndarray :
+                  min_toggle : float, max_toggle : float, skip_bins: int = 0) -> np.ndarray :
       """ get the glued profile
       Parameters
       ----------
@@ -239,12 +258,15 @@ def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
             count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
       max_toggle: float
             count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
+      skip_bins: int
+            if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
+            if the `skip_bins` is negative or 0 both arrays will be  unchanged.
       Returns
       np.ndarray :
             glued profile in MHz
       -------
       """
-      [analog_compressed, pc_compressed] = mask_profiles(analog, pc_MHz, min_toggle, max_toggle)
+      [analog_compressed, pc_compressed] = mask_profiles(analog, pc_MHz, min_toggle, max_toggle, skip_bins)
       [m,b] = analog_to_pc_scale(analog_compressed, pc_compressed, 0, pc_compressed.size)
       analog_scaled =  m * analog + b
       use_analog = 1 *  (pc_MHz > max_toggle)
