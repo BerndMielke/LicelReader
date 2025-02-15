@@ -100,24 +100,28 @@ class dataSet:
     def getDescString(self): #: data set description string
       match self.dataType:
         case 0:
-          desc = "Analog Bins: " + str(self.numBins) + \
+          desc = "wavelength: " + str(self.wavelength) + ' nm' +\
+             "\nAnalog Bins: " + str(self.numBins) + \
              "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\nADC:         " + str(self.ADCBits) + \
              "\nInput:       " + str(self.inputRange * 1000) + "mV" 
         case 1:
-          desc = "Photon Bins: " + str(self.numBins) + \
+          desc = "wavelength: " + str(self.wavelength) + ' nm' + \
+              "\nPhoton Bins: " + str(self.numBins) + \
               "\nbinWidth:    " + str(self.binWidth) + \
               "\nShots:       " + str(self.numShots) + \
               "\ndiscr:       " + str(int(round(63 * self.discriminator/ 25.0)))
         case 2:
-          desc = "Analog  Square Bins: " + str(self.numBins) + \
+          desc = "wavelength: " + str(self.wavelength) + ' nm' +\
+             "\nAnalog  Square Bins: " + str(self.numBins) + \
              "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\nADC:         " + str(self.ADCBits) + \
              "\nInput:       " + str(self.inputRange * 1000) + "mV"
         case 3:
-          desc = "Photon Square Bins: " + str(self.numBins) + \
+          desc = "wavelength: " + str(self.wavelength) + ' nm' +\
+              "\nPhoton Square Bins: " + str(self.numBins) + \
               "\nbinWidth:    " + str(self.binWidth) + \
               "\nShots:       " + str(self.numShots) + \
               "\ndiscr:       " + str(int(round(63 * self.discriminator/ 25.0)))
@@ -126,7 +130,8 @@ class dataSet:
         case 5:
           desc = "Analog Overflow: " + str(self.numBins)
         case _: 
-          desc = "Analog Bins: " + str(self.numBins) + \
+          desc = "wavelength: " + str(self.wavelength) + ' nm' +\
+             "\nAnalog Bins: " + str(self.numBins) + \
              "\nbinWidth:    " + str(self.binWidth) + \
              "\nShots:       " + str(self.numShots) + \
              "\nADC:         " + str(self.ADCBits) + \
