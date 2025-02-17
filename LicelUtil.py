@@ -29,6 +29,33 @@ def offset_correction(physData: np.ndarray, start: int,
       arr = physData[start:stop] 
       return physData - np.mean(arr)
 
+def pr2(physData: np.ndarray, t0 : int, start: int,
+                       stop : int) ->  np.ndarray:
+      """ 
+      return an range corrected array based on the data input. Before t0 
+      the input is multiplied by 1
+      
+      Parameters
+      ----------
+      physData: np.ndarray
+            Data in MHz or mV
+      t0: int
+            index of the t0 point
+      start: int
+            Start index for the background region
+      stop: int
+            Stop index for the background region
+      
+      Returns
+      -------
+      np.ndarray:
+            range corrected numpy array
+      """
+      range_array = np.arange(-t0, physData.size - t0)
+      range_array = np.minimum(range_array, np.ones(physData.size))
+      arr = physData[start:stop] 
+      return (physData - np.mean(arr)) * range_array * range_array
+
 def smoothed_signal(data: np.ndarray, filterWidth: int) -> np.ndarray :
       """ return a smoothed array based on the data input 
 
