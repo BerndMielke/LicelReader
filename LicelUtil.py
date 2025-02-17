@@ -52,7 +52,7 @@ def pr2(physData: np.ndarray, t0 : int, start: int,
             range corrected numpy array
       """
       range_array = np.arange(-t0, physData.size - t0)
-      range_array = np.minimum(range_array, np.ones(physData.size))
+      range_array = np.maximum(range_array, np.ones(physData.size))
       arr = physData[start:stop] 
       return (physData - np.mean(arr)) * range_array * range_array
 
