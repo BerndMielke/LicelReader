@@ -75,28 +75,34 @@ class dataSet:
     PM 	powermeter (powermeter)
     OF 	overflow
     """
+    comment : str = ''
+    """ data set comment 
+    """
     rawData : np.ndarray = np.zeros((3,)) #: binary raw sum 
     physData : np.ndarray = np.zeros((3,)) #: scaled to physical values
     
   
     def __init__(self, stringIn):
-      self.active = int(stringIn.split()[0]) 
-      self.dataType = int(stringIn.split()[1])
-      self.laserSource = int(stringIn.split()[2])
-      self.numBins     = int(stringIn.split()[3])
-      self.laserPolarization = int(stringIn.split()[4])
-      self.highVoltage = int(stringIn.split()[5])
-      (self.binWidth) = float(stringIn.split()[6])
-      self.wavelength = int(stringIn.split()[7].split('.')[0])
-      self.Polarization = stringIn.split()[7].split('.')[1]
-      self.binshift = int(stringIn.split()[8])
-      self.ADCBits = int(stringIn.split()[12])
-      self.numShots = int(stringIn.split()[13])
+      splitted = stringIn.split()
+      self.active = int(splitted[0]) 
+      self.dataType = int(splitted[1])
+      self.laserSource = int(splitted[2])
+      self.numBins     = int(splitted[3])
+      self.laserPolarization = int(splitted[4])
+      self.highVoltage = int(splitted[5])
+      (self.binWidth) = float(splitted[6])
+      self.wavelength = int(splitted[7].split('.')[0])
+      self.Polarization = splitted[7].split('.')[1]
+      self.binshift = int(splitted[8])
+      self.ADCBits = int(splitted[12])
+      self.numShots = int(splitted[13])
       if ((self.dataType == 0) or (self.dataType == 2)):
-        self.inputRange = float(stringIn.split()[14])
+        self.inputRange = float(splitted[14])
       else: 
-        self.discriminator = float(stringIn.split()[14])
-      self.descriptor = stringIn.split()[15]
+        self.discriminator = float(splitted[14])
+      self.descriptor = splitted[15]
+      if len(splitted) > 16 :
+        self.comment = splitted[16]
     def getDescString(self): #: data set description string
       match self.dataType:
         case 0:
