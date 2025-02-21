@@ -146,6 +146,13 @@ class dataSet:
         desc += "\nHV:          " + str(self.highVoltage) + "V" + \
               "\nPol.:        " + self.Polarization
       return desc
+    def x_axis_m(self) :
+      #: return an x array in meter for plotting
+      return np.arange(self.numBins) * self.binWidth
+    def x_axis_us(self) :
+      #: return an x array in microseconds for plotting
+      print (self.numBins)
+      return np.arange(self.numBins) * self.binWidth / 150.0
 
 
          
