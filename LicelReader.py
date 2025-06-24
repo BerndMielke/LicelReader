@@ -146,6 +146,23 @@ class dataSet:
         desc += "\nHV:          " + str(self.highVoltage) + "V" + \
               "\nPol.:        " + self.Polarization
       return desc
+    def getShortDescr(self) :
+        desc = str(self.wavelength) + ' nm '
+        match self.dataType:
+          case 0:
+            desc +=  "A"
+          case 1: 
+            desc += "PC"
+          case 2:
+            desc += "ASQR"
+          case 3: 
+            desc += "PCSQR"
+          case _:
+            desc = desc
+        if (self.dataType < 4) :
+          if self.Polarization != 'o' :
+            desc +=  ' ' + self.Polarization
+        return desc
     def x_axis_m(self) :
       #: return an x array in meter for plotting
       return np.arange(self.numBins) * self.binWidth
@@ -162,6 +179,7 @@ class LicelFileReader:
   def __init__(self, filename):
      self.GlobalInfo = GlobalInfo()
      self.dataSet = []
+     self.shortDescr = []
      fp = open(filename, 'rb')
      encoding = 'utf-8'
      self.GlobalInfo.filename = str(fp.readline(), encoding).split()[0];
@@ -192,7 +210,7 @@ class LicelFileReader:
        if (i > 0):
         fp.read(2)
        self.dataSet[i].rawData = np.fromfile(fp, dtype=np.uint32, count = self.dataSet[i].numBins)
-
+       self.shortDescr.append(self.dataSet[i].getShortDescr())
        scale = 1.0 / (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1);
        if ((self.dataSet[i].dataType == 0) and (self.dataSet[i].ADCBits > 1)): #analog
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
