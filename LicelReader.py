@@ -145,7 +145,7 @@ class dataSet:
       if (self.dataType < 4) :
         desc += "\nHV:          " + str(self.highVoltage) + "V" + \
               "\nPol.:        " + self.Polarization + \
-              "\n" + self.descriptor + " " + self.comment
+              "\nID: " + self.descriptor + " " + self.comment
       return desc
     def getShortDescr(self) :
         desc = str(self.wavelength) + ' nm '
