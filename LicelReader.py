@@ -144,7 +144,8 @@ class dataSet:
              "\nInput:       " + str(self.inputRange * 1000) + "mV" 
       if (self.dataType < 4) :
         desc += "\nHV:          " + str(self.highVoltage) + "V" + \
-              "\nPol.:        " + self.Polarization
+              "\nPol.:        " + self.Polarization + \
+              "\n" + self.descriptor + " " + self.comment
       return desc
     def getShortDescr(self) :
         desc = str(self.wavelength) + ' nm '

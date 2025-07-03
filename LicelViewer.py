@@ -87,14 +87,14 @@ class App(tk.Tk):
         
     def change(self, event):
         self.draw_Data()
-    def ds_up(self, event):
+    def ds_down(self, event):
          ds = self.varline.current()
          ds += 1
          if ds >= len(self.varline['values']) :
              ds = 0
          self.varline.current(ds)
          self.draw_Data()
-    def ds_down(self, event):
+    def ds_up(self, event):
          ds = self.varline.current()
          ds -= 1
          if ds < 0 :
