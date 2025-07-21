@@ -1,4 +1,5 @@
 import numpy as np
+import re
 import os
 
 class GlobalInfo:
@@ -148,7 +149,11 @@ class dataSet:
               "\nID: " + self.descriptor + " " + self.comment
       return desc
     def getShortDescr(self) :
-        desc = str(self.wavelength) + ' nm '
+        if (self.wavelength > 0) :
+           desc = str(self.wavelength) + ' nm '
+        else :
+           spl = re.split('(?<=\D)(?=\d)|(?<=\d)(?=\D)', self.descriptor)
+           desc = "TR" + str(spl[-1]) + ' '
         match self.dataType:
           case 0:
             desc +=  "A"
