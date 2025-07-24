@@ -66,6 +66,18 @@ class App(tk.Tk):
             self.axes.set_ylabel('AU')
         self.axes.set_xlabel('m')
         self.figure_canvas.draw()
+    def baseline(self):
+        ds = self.varline.current()
+        if ds < 0 :
+            self.varline.current(0)
+            ds = 0 
+        y = self.file.dataSet[ds].physData
+        if self.file.dataSet[ds].dataType == 0 :
+            y = 1000 * self.file.dataSet[ds].physData
+        mean = np.average(y[-1000:-1])
+        self.axes.set_ylim(mean + 5 * (np.min(y[-1000:-1] - mean)),mean + 5*(np.max(y[-1000:-1])  -mean))
+        print("baseline")
+        self.figure_canvas.draw()
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
         self.varline['values'] = self.file.shortDescr
@@ -152,6 +164,7 @@ class App(tk.Tk):
         root.bind('<Down>', lambda event : self.ds_down(event))
         root.bind('<Right>', lambda event : self.nextFile(event))
         root.bind('<Left>', lambda event : self.prevFile(event))
+        root.bind('<b>', lambda event : self.baseline())
         self.select_file()
         
 if __name__ == '__main__':
