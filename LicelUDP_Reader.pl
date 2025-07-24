@@ -13,9 +13,10 @@ config.read('LicelUDP.ini')
 data_path = config['Reader']['dataDir']
 
 numDataSets = int(config['Reader']['numDataSets'])
-for x in range(numDataSets) 
-    ds[x] = int(config['Reader']['ds' + str(x)])
-
+ds = []
+line = []
+for x in range(numDataSets):
+  ds.append(int(config['Reader']['ds' + str(x)]))
 print(ds)
 
 logPlot = bool(config['Reader']['logPLot'])
@@ -35,36 +36,37 @@ fig, ax = plt.subplots()
 while True:
     # Thanks @seym45 for a fix
     data, addr = client.recvfrom(1024)
-    
+
     filename = str(data).split('\\')[-1]
     if filename.find('START') > 0 or filename.find('STOP') > 0 :
-        continue 
+        continue
     filename = filename.split('\'')[0]
     filepath = os.path.join(data_path, filename)
     file = LicelFileReader(filepath)
-    
+
     if not isInitialized :
         isInitialized = True
-       for x in range(numDataSets)  
+        for i in range(numDataSets) :
             x = file.dataSet[ds[x]].x_axis_m()
             y = file.dataSet[ds[x]].physData
-        
-            if( logPLot) :
-                (line[x], ) = ax.semilogy(x,y)
-            else : 
-                (line[x], ) = ax.plot(x,y)
-           
-        fig.canvas.draw()
-        fig.canvas.flush_events()
-        
-    else :
-        for x in range(numDataSets)  
-            line[x].set_ydata(file.dataSet[ds[x]].physData)
-        
-        fig.canvas.draw()
-        fig.canvas.flush_events()
-        
-     
-    
 
-    
+            if( logPLot) :
+                (ll, )  = ax.semilogy(x,y)
+                line.append(ll)
+            else :
+                (ll, ) = ax.plot(x,y)
+                line.append(ll)
+
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
+    else :
+        for x in range(numDataSets) :
+            line[x].set_ydata(file.dataSet[ds[x]].physData)
+
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
+
+
+
