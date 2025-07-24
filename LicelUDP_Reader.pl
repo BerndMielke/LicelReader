@@ -48,16 +48,20 @@ while True:
         print("initialized")
         x = file.dataSet[ds0].x_axis_m()
         y = file.dataSet[ds0].physData
-        
+        x2 = file.dataSet[ds0].x_axis_m()
+        y2 = file.dataSet[ds1].physData
         if( logPLot) :
-            (line1, ) = ax.plot(x,y)
+            (line1, ) = ax.semilogy(x,y)
+            (line2, ) = ax.semilogy(x2,y2)
         else : 
             (line1, ) = ax.plot(x,y)
+            (line2, ) = ax.plot(x2,y2)
         fig.canvas.draw()
         fig.canvas.flush_events()
         print("plotted")
     else :
         line1.set_ydata(file.dataSet[ds0].physData)
+        line1.set_ydata(file.dataSet[ds1].physData)
         fig.canvas.draw()
         fig.canvas.flush_events()
         print("udpate") 
