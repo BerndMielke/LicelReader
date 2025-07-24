@@ -53,7 +53,9 @@ class App(tk.Tk):
         else :
             self.line1.set_xdata(x)
             self.line1.set_ydata(y)
-        self.axes.set_ylim(np.min(y),np.max(y))
+        ymin = np.min(y)
+        ymax =  np.max(y) + 0.02 * (np.max(y) - np.min(y))    
+        self.axes.set_ylim(ymin, ymax)
         L = self.axes.legend([self.line1], [self.file.dataSet[ds].getDescString()])
         plt.setp(L.texts, family='Consolas')
         self.axes.set_title(self.filename)
@@ -76,7 +78,6 @@ class App(tk.Tk):
             y = 1000 * self.file.dataSet[ds].physData
         mean = np.average(y[-1000:-1])
         self.axes.set_ylim(mean + 5 * (np.min(y[-1000:-1] - mean)),mean + 5*(np.max(y[-1000:-1])  -mean))
-        print("baseline")
         self.figure_canvas.draw()
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
