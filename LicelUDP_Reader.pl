@@ -11,17 +11,17 @@ from LicelUtil import *
 config = configparser.ConfigParser()
 config.read('LicelUDP.ini')
 data_path = config['Reader']['dataDir']
-ds0 = int(config['Reader']['ds0'])
+
+numDataSets = int(config['Reader']['numDataSets'])
+for x in range(numDataSets) 
+    ds[x] = int(config['Reader']['ds' + str(x)])
+
+print(ds)
+
 logPlot = bool(config['Reader']['logPLot'])
 print(data_path)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
-
-# Enable port reusage so we will be able to run multiple clients and servers on single (host, port). 
-# Do not use socket.SO_REUSEADDR except you using linux(kernel<3.9): goto https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ for more information.
-# For linux hosts all sockets that want to share the same address and port combination must belong to processes that share the same effective user ID!
-# So, on linux(kernel>=3.9) you have to run multiple servers and clients under one user to share the same (host, port).
-
 
 # Enable broadcasting mode
 client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -42,29 +42,28 @@ while True:
     filename = filename.split('\'')[0]
     filepath = os.path.join(data_path, filename)
     file = LicelFileReader(filepath)
-    print("file read")
+    
     if not isInitialized :
         isInitialized = True
-        print("initialized")
-        x = file.dataSet[ds0].x_axis_m()
-        y = file.dataSet[ds0].physData
-        x2 = file.dataSet[ds0].x_axis_m()
-        y2 = file.dataSet[ds1].physData
-        if( logPLot) :
-            (line1, ) = ax.semilogy(x,y)
-            (line2, ) = ax.semilogy(x2,y2)
-        else : 
-            (line1, ) = ax.plot(x,y)
-            (line2, ) = ax.plot(x2,y2)
+       for x in range(numDataSets)  
+            x = file.dataSet[ds[x]].x_axis_m()
+            y = file.dataSet[ds[x]].physData
+        
+            if( logPLot) :
+                (line[x], ) = ax.semilogy(x,y)
+            else : 
+                (line[x], ) = ax.plot(x,y)
+           
         fig.canvas.draw()
         fig.canvas.flush_events()
-        print("plotted")
+        
     else :
-        line1.set_ydata(file.dataSet[ds0].physData)
-        line1.set_ydata(file.dataSet[ds1].physData)
+        for x in range(numDataSets)  
+            line[x].set_ydata(file.dataSet[ds[x]].physData)
+        
         fig.canvas.draw()
         fig.canvas.flush_events()
-        print("udpate") 
+        
      
     
 
