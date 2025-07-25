@@ -152,7 +152,7 @@ class dataSet:
         if (self.wavelength > 0) :
            desc = str(self.wavelength) + ' nm '
         else :
-           spl = re.split('(?<=\D)(?=\d)|(?<=\d)(?=\D)', self.descriptor)
+           spl = re.split('(?<=\D)(?=\d)|(?<=\d)(?=\D)', self.descriptor) # type: ignore
            desc = "TR" + str(spl[-1]) + ' '
         match self.dataType:
           case 0:
