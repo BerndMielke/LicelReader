@@ -15,12 +15,12 @@ data_path = config['Reader']['dataDir']
 numDataSets = int(config['Reader']['numDataSets'])
 ds = []
 line = []
-for x in range(numDataSets):
-  ds.append(int(config['Reader']['ds' + str(x)]))
-print(ds)
+for i in range(numDataSets):
+  ds.append(int(config['Reader']['ds' + str(i)]))
 
-logPlot = bool(config['Reader']['logPLot'])
-print(data_path)
+
+logPlot = bool(config['Reader']['logPlot'])
+
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
 
@@ -47,10 +47,10 @@ while True:
     if not isInitialized :
         isInitialized = True
         for i in range(numDataSets) :
-            x = file.dataSet[ds[x]].x_axis_m()
-            y = file.dataSet[ds[x]].physData
+            x = file.dataSet[ds[i]].x_axis_m()
+            y = file.dataSet[ds[i]].physData
 
-            if( logPLot) :
+            if( logPlot) :
                 (ll, )  = ax.semilogy(x,y)
                 line.append(ll)
             else :
@@ -61,8 +61,8 @@ while True:
         fig.canvas.flush_events()
 
     else :
-        for x in range(numDataSets) :
-            line[x].set_ydata(file.dataSet[ds[x]].physData)
+        for i in range(numDataSets) :
+            line[i].set_ydata(file.dataSet[ds[i]].physData)
 
         fig.canvas.draw()
         fig.canvas.flush_events()
