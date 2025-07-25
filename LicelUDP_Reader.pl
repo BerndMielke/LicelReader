@@ -43,7 +43,16 @@ while True:
     filename = filename.split('\'')[0]
     filepath = os.path.join(data_path, filename)
     file = LicelFileReader(filepath)
-
+    print(filepath)
+    
+    ax.set_title(filename)
+    ax.set_xlabel('m')
+    if file.dataSet[0].dataType == 0 :
+        ax.set_ylabel('mV')
+    elif file.dataSet[0].dataType == 1 :
+        axes.set_ylabel('MHz')
+    else :             
+        axes.set_ylabel('AU')
     if not isInitialized :
         isInitialized = True
         for i in range(numDataSets) :
@@ -56,7 +65,7 @@ while True:
             else :
                 (ll, ) = ax.plot(x,y)
                 line.append(ll)
-
+        
         fig.canvas.draw()
         fig.canvas.flush_events()
 
