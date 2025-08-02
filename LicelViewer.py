@@ -166,7 +166,13 @@ class App(tk.Tk):
         root.bind('<Right>', lambda event : self.nextFile(event))
         root.bind('<Left>', lambda event : self.prevFile(event))
         root.bind('<b>', lambda event : self.baseline())
-        self.select_file()
+        print(sys.argv)
+        if len(sys.argv) > 1:
+            self.filename = sys.argv[1]
+            self.openDataFile()
+        else :
+           self.select_file()
+        
         
 if __name__ == '__main__':
     app = App()
