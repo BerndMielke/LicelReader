@@ -197,7 +197,7 @@ def skip_first_bins(analog: np.ndarray, pc_MHz: np.ndarray,
       if skip_bins < 0 :
          skip_bins = 0    
       analog_shifted = analog[skip_bins:]
-      pc_shifted = pc_MHz[skip_bins]
+      pc_shifted = pc_MHz[skip_bins:]
       return ([analog_shifted, pc_shifted])
 
 class GluingStrategy(Enum):
@@ -256,7 +256,7 @@ def check_gluing_strategy (analog: np.ndarray, pc_MHz: np.ndarray,
       return GluingStrategy.GLUE_PROFILES
 
 def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
-                  min_toggle : float, max_toggle : float, skip_bins: int = 0) -> list[np.ndarray] :
+                  min_toggle : float, max_toggle : float) -> list[np.ndarray] :
       """ mask in both profiles as Nan when the photon counting is outside 
       the min_toggle - max_toggle - range and compress the arrays so that only data points that are inside the range are returned
 
@@ -270,23 +270,21 @@ def mask_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
             count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
       max_toggle: float
             count rate in MHz values below or equal to the `max_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
-      skip_bins: int
-            if `skip_bins` is larger than 0 the first `skip_bins` bins will be removed from  the analog data  and photon counting 
-            if the `skip_bins` is negative or 0 both arrays will be  unchanged.
       
       Returns
       -------
       list[np.ndarray] :
             compressed  arrays [analog, pc]
       """
+
       pc_masked = ma.masked_outside(pc_MHz, min_toggle, max_toggle)
-      pc_masked[0: skip_bins] = ma.masked
       analog_masked = ma.masked_where(pc_masked.mask, analog)
       pc_compressed = pc_masked.compressed()
       analog_compressed = analog_masked.compressed()
       return ([analog_compressed, pc_compressed])
 
-def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray, 
+def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray, binshift : int, 
+                  deadtime_ns : float,
                   min_toggle : float, max_toggle : float, skip_bins: int = 0) -> np.ndarray :
       """ get the glued profile
 
@@ -295,7 +293,13 @@ def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
       analog: np.array
             array of the analog data
       pc_MHz : np.ndarray
-            photon counting array as observed in MHz, this should be the dead time corrected values
+            photon counting array as observed in MHz,
+      deadtime_ns : float
+            The dead time of the detection system, typical values are 3.08 ns
+      binshift: int
+            if binshift is larger than 0 the first binshift bins will be removed from  the analog data and the last binshift bins will be removed from the photon counting so that both are reduced equally in size.
+            if the binshift is negative the first bins will be removed from the photon counting
+            if the binshift is negative both arrays will be  unchanged.
       min_toggle: float
             count rate in MHz values above or equal to the `min_toggle` will be used for computing the linear transfer coefficients between analog and photon counting. 
       max_toggle: float
@@ -309,9 +313,17 @@ def glue_profiles(analog: np.ndarray, pc_MHz: np.ndarray,
       np.ndarray :
             glued profile in MHz
       """
-      [analog_compressed, pc_compressed] = mask_profiles(analog, pc_MHz, min_toggle, max_toggle, skip_bins)
-      [m,b] = analog_to_pc_scale(analog_compressed, pc_compressed, 0, pc_compressed.size)
-      analog_scaled =  m * analog + b
-      use_analog = 1 *  (pc_MHz > max_toggle)
-      return use_analog * analog_scaled + (1 - use_analog) * pc_MHz
+      [analog_shifted, pc_shifted] = bin_shift(analog, pc_MHz, binshift)
+      pc_corr =  deadtime_correction(pc_shifted, deadtime_ns)
+      [analog_sk, pc_sk] = skip_first_bins(analog_shifted, pc_corr, skip_bins)
+      if check_gluing_strategy (analog_sk, pc_sk, min_toggle, max_toggle) == GluingStrategy.GLUE_PROFILES :
+         [analog_compressed, pc_compressed] = mask_profiles(analog_sk, pc_corr, min_toggle, max_toggle)
+         [m,b] = analog_to_pc_scale(analog_compressed, pc_compressed, 0, pc_compressed.size)
+         fit_error = np.mean(np.square(m * analog_compressed + b - pc_compressed))
+         analog_scaled =  m * analog_shifted + b
+         use_analog = 1 *  (pc_corr> max_toggle)
+         glued = use_analog * analog_scaled + (1 - use_analog) * pc_corr
+         return [glued, analog_scaled, pc_corr, pc_shifted, m, b, fit_error]
+      else :
+         return [pc_corr, analog_shifted, pc_corr, pc_shifted, 0, 0, 0]
 
