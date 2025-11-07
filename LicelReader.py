@@ -1,6 +1,5 @@
 import numpy as np
 import re
-import os
 
 class GlobalInfo:
     """ The measurement situation is described in this class
@@ -79,12 +78,12 @@ class dataSet:
     comment : str = ''
     """ data set comment 
     """
-    rawData : np.ndarray = np.zeros((3,)) #: binary raw sum 
-    physData : np.ndarray = np.zeros((3,)) #: scaled to physical values
+    rawData : np.ndarray[tuple[int, ...], np.dtype[np.uint32]] = np.zeros((3,), dtype=np.uint32) #: binary raw sum 
+    physData : np.ndarray[tuple[int, ...], np.dtype[np.float64]] = np.zeros((3,), dtype=np.float64) #: scaled to physical values
     
   
-    def __init__(self, stringIn):
-      splitted = stringIn.split()
+    def __init__(self, stringIn: str):
+      splitted: list[str] = stringIn.split()
       self.active = int(splitted[0]) 
       self.dataType = int(splitted[1])
       self.laserSource = int(splitted[2])
@@ -182,10 +181,10 @@ class dataSet:
 
 
 class LicelFileReader:
-  def __init__(self, filename):
+  def __init__(self, filename:str):
      self.GlobalInfo = GlobalInfo()
-     self.dataSet = []
-     self.shortDescr = []
+     self.dataSet: list[dataSet] = []
+     self.shortDescr: list[str] = []
      fp = open(filename, 'rb')
      encoding = 'utf-8'
      self.GlobalInfo.filename = str(fp.readline(), encoding).split()[0];
@@ -204,7 +203,7 @@ class LicelFileReader:
      self.GlobalInfo.numShotsL0  = int(self.secondline.split()[0])
      self.GlobalInfo.repRateL0  = int(self.secondline.split()[1])
      self.GlobalInfo.numShotsL1  = int(self.secondline.split()[2])
-     self.GlobalInfo.reprateL1  = int(self.secondline.split()[3])
+     self.GlobalInfo.repRateL1  = int(self.secondline.split()[3])
      self.GlobalInfo.numDataSets   = int(self.secondline.split()[4])
      #self.GlobalInfo.numShotsL2  = int(self.secondline.split()[5])
      #self.GlobalInfo.repRateL2  = int(self.secondline.split()[6])
@@ -221,10 +220,10 @@ class LicelFileReader:
        if ((self.dataSet[i].dataType == 0) and (self.dataSet[i].ADCBits > 1)): #analog
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          scale *= self.dataSet[i].inputRange / maxbits
-         self.dataSet[i].physData = scale * self.dataSet[i].rawData
+         self.dataSet[i].physData = np.array(scale * self.dataSet[i].rawData, dtype=np.float64)
        elif (self.dataSet[i].dataType == 1): # pc
          scale *= (150 / self.dataSet[i].binWidth)
-         self.dataSet[i].physData = scale * self.dataSet[i].rawData  
+         self.dataSet[i].physData = np.array(scale * self.dataSet[i].rawData, dtype=np.float64) 
        elif (self.dataSet[i].dataType == 2): # analog sqr
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          n = (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
@@ -235,8 +234,8 @@ class LicelFileReader:
          scale *= (150 / self.dataSet[i].binWidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
          self.dataSet[i].physData = scale * self.dataSet[i].rawData  
        else :
-         self.dataSet[i].physData = scale * self.dataSet[i].rawData
-     term = fp.read(2) #read the terminating CRLF
+         self.dataSet[i].physData = np.array(scale * self.dataSet[i].rawData, dtype=np.float64)
+     term = fp.read(2) # type: ignore #read the terminating CRLF
      #if (term != '\r\n') :
        #print('wrong termination')
      #else :
