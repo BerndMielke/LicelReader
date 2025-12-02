@@ -163,6 +163,7 @@ class App(tk.Tk):
         self.varline.bind("<<ComboboxSelected>>", lambda event: self.change(event))
         root.bind('<Up>', lambda event : self.ds_up(event))
         root.bind('<Down>', lambda event : self.ds_down(event))
+        root.bind('<space>', lambda event : self.ds_down(event))
         root.bind('<Right>', lambda event : self.nextFile(event))
         root.bind('<Left>', lambda event : self.prevFile(event))
         root.bind('<b>', lambda event : self.baseline())
