@@ -79,7 +79,14 @@ class dataSet:
     """ data set comment 
     """
     rawData : np.ndarray[tuple[int, ...], np.dtype[np.uint32]] = np.zeros((3,), dtype=np.uint32) #: binary raw sum 
-    physData : np.ndarray[tuple[int, ...], np.dtype[np.float64]] = np.zeros((3,), dtype=np.float64) #: scaled to physical values
+    physData : np.ndarray[tuple[int, ...], np.dtype[np.float64]] = np.zeros((3,), dtype=np.float64)
+    """ 
+    scaled to physical values
+    for analog datasets - V
+    for photon counting - MHz
+    analog standard error of the mean in Volts
+    pc standard error of the mean in MHz
+    """
     
   
     def __init__(self, stringIn: str):
@@ -228,11 +235,11 @@ class LicelFileReader:
          maxbits = (2 ** self.dataSet[i].ADCBits) - 1
          n = (self.dataSet[i].numShots if self.dataSet[i].numShots > 0 else 1)
          sq_n_1 = np.sqrt(self.dataSet[i].numShots -1) if (self.dataSet[i].numShots > 1) else 1
-         scale = self.dataSet[i].inputRange /(n * sq_n_1) /maxbits 
+         scale = self.dataSet[i].inputRange /(n * sq_n_1) /maxbits # phys data in Volts
          self.dataSet[i].physData = scale * self.dataSet[i].rawData 
        elif (self.dataSet[i].dataType == 3): # pc sqr
          scale *= (150 / self.dataSet[i].binWidth) / np.sqrt((self.dataSet[i].numShots -1) if self.dataSet[i].numShots > 1 else 1)
-         self.dataSet[i].physData = scale * self.dataSet[i].rawData  
+         self.dataSet[i].physData = scale * self.dataSet[i].rawData  #phys data in MHz
        else :
          self.dataSet[i].physData = np.array(scale * self.dataSet[i].rawData, dtype=np.float64)
      term = fp.read(2) # type: ignore #read the terminating CRLF
