@@ -77,7 +77,9 @@ class App(tk.Tk):
         if self.file.dataSet[ds].dataType == 0 :
             y = 1000 * self.file.dataSet[ds].physData
         mean = np.average(y[-1000:-1])
+        std_dev = np.std(y[-1000:-1])
         self.axes.set_ylim(mean + 5 * (np.min(y[-1000:-1] - mean)),mean + 5*(np.max(y[-1000:-1])  -mean))
+        self.axes.annotate(str(std_dev), self.line1.get_xdata[-1000],self.line1.get_ydata[-1000])
         self.figure_canvas.draw()
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
