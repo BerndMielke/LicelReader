@@ -13,10 +13,8 @@ from LicelUtil import *
 matplotlib.use('TkAgg')
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg,
-    NavigationToolbar2Tk
-)
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 
 # create the root window
 root = tk.Tk()
@@ -86,7 +84,7 @@ class App(tk.Tk):
         
 
         mean = np.median(y[base_start:base_end])
-        self.axes.set_ylim(mean + 5 * (np.min(y[base_start:base_end] - mean)),mean + 5*(np.max(y[base_start:base_end])  -mean))
+        self.axes.set_ylim(float(mean + 5 * (np.min(y[base_start:base_end] - mean))),float(mean + 5*(np.max(y[base_start:base_end])  -mean)))
         self.figure_canvas.draw()
     def DreieckZoom(self):
         ds = self.varline.current()
@@ -106,7 +104,6 @@ class App(tk.Tk):
         self.varline['values'] = self.file.shortDescr
         if self.varline.current() < 0:
           self.varline.set(0) 
-          self.varline.configure(textvariable = self.file.shortDescr[0]) 
         self.draw_Data()
 
     def select_file(self):
