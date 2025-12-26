@@ -56,6 +56,7 @@ class App(tk.Tk):
         ymin = np.min(y)
         ymax =  np.max(y) + 0.02 * (np.max(y) - np.min(y))    
         self.axes.set_ylim(ymin, ymax)
+        self.axes.autoscale(enable=True, axis='x')
         L = self.axes.legend([self.line1], [self.file.dataSet[ds].getDescString()])
         plt.setp(L.texts, family='Consolas')
         self.axes.set_title(self.filename)
@@ -76,10 +77,29 @@ class App(tk.Tk):
         y = self.file.dataSet[ds].physData
         if self.file.dataSet[ds].dataType == 0 :
             y = 1000 * self.file.dataSet[ds].physData
-        mean = np.average(y[-1000:-1])
-        std_dev = np.std(y[-1000:-1])
-        self.axes.set_ylim(mean + 5 * (np.min(y[-1000:-1] - mean)),mean + 5*(np.max(y[-1000:-1])  -mean))
-        self.axes.annotate(str(std_dev), self.line1.get_xdata[-1000],self.line1.get_ydata[-1000])
+        if self.file.dataSet[ds].dataType == 0 or self.file.dataSet[ds].dataType == 1 :
+            base_start = -1000
+            base_end = -1
+        else:
+            base_start = 0
+            base_end = 100
+        
+
+        mean = np.median(y[base_start:base_end])
+        self.axes.set_ylim(mean + 5 * (np.min(y[base_start:base_end] - mean)),mean + 5*(np.max(y[base_start:base_end])  -mean))
+        self.figure_canvas.draw()
+    def DreieckZoom(self):
+        ds = self.varline.current()
+        if ds < 0 :
+            self.varline.current(0)
+            ds = 0
+        y = self.file.dataSet[ds].physData
+        if self.file.dataSet[ds].dataType == 0 :
+            y = 1000 * self.file.dataSet[ds].physData
+        start_idx = 400
+        end_idx = 600
+        self.axes.set_ylim(y[end_idx], y[start_idx])
+        self.axes.set_xlim(self.file.dataSet[ds].x_axis_m()[start_idx], self.file.dataSet[ds].x_axis_m()[end_idx])
         self.figure_canvas.draw()
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
@@ -165,9 +185,11 @@ class App(tk.Tk):
         self.varline.bind("<<ComboboxSelected>>", lambda event: self.change(event))
         root.bind('<Up>', lambda event : self.ds_up(event))
         root.bind('<Down>', lambda event : self.ds_down(event))
+        root.bind('<space>', lambda event : self.ds_down(event))
         root.bind('<Right>', lambda event : self.nextFile(event))
         root.bind('<Left>', lambda event : self.prevFile(event))
         root.bind('<b>', lambda event : self.baseline())
+        root.bind('<d>', lambda event : self.DreieckZoom())
         print(sys.argv)
         if len(sys.argv) > 1:
             self.filename = sys.argv[1]
