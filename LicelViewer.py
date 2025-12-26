@@ -16,13 +16,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 
-# create the root window
-root = tk.Tk()
-root.title('python min viewer')
-root.resizable(True, True)
-root.geometry('1200x1000')
-
-
 axes = None
 figure = None
 figure_canvas = None
@@ -102,9 +95,10 @@ class App(tk.Tk):
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
         self.varline['values'] = self.file.shortDescr
-        if self.varline.current() < 0:
-          self.varline.set(0) 
+        self.varline.current(0)
         self.draw_Data()
+        self.lift()
+        self.focus_force()
 
     def select_file(self):
         filetypes = (
@@ -119,6 +113,8 @@ class App(tk.Tk):
         
     def change(self, event):
         self.draw_Data()
+        self.lift()
+        self.focus_force()
     def ds_down(self, event):
          ds = self.varline.current()
          ds += 1
@@ -149,16 +145,21 @@ class App(tk.Tk):
         self.openDataFile()
 
     def __init__(self):
+        super().__init__()
+        self.title('python min viewer')
+        self.resizable(True, True)
+        self.geometry('1200x1000')
+        
         # open button
         open_button = ttk.Button(
-        root,
+        self,
         text='Open a File',
         command=self.select_file
         )
 
         # configure the grid
-        root.columnconfigure(0, weight=1)
-        root.columnconfigure(1, weight=50)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=50)
 
         open_button.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
 
@@ -169,30 +170,44 @@ class App(tk.Tk):
 
         # create the toolbar
         toolbar = NavigationToolbar2Tk(self.figure_canvas, pack_toolbar=False)
+        toolbar._key_press = lambda event: None  # Disable toolbar key handling
         # create axes
         self.axes = figure.add_subplot()
         self.figure_canvas.get_tk_widget().grid(column=1, row=0, rowspan= 2, sticky=tk.E, padx=5, pady=5)
+        self.figure_canvas.get_tk_widget().config(takefocus=0)
+        # Disable matplotlib key handling on the canvas
+        self.figure_canvas._tkcanvas.unbind('<Key>')
         toolbar.grid(column=1, row=2, sticky=tk.W, padx=5, pady=5)
+        toolbar.config(takefocus=0)
+        # Bind keys to canvas as well to override matplotlib
+        canvas = self.figure_canvas.get_tk_widget()
+        canvas.bind('<Up>', lambda event: self.ds_up(event))
+        canvas.bind('<Down>', lambda event: self.ds_down(event))
+        canvas.bind('<space>', lambda event: self.ds_down(event))
+        canvas.bind('<Right>', lambda event: self.nextFile(event))
+        canvas.bind('<Left>', lambda event: self.prevFile(event))
+        canvas.bind('<b>', lambda event: self.baseline())
+        canvas.bind('<d>', lambda event: self.DreieckZoom())
         self.line1 = None
-        n = tk.StringVar() 
-        self.varline = ttk.Combobox(root, width = 20,  textvariable = n, state="readonly") 
+        self.varline = ttk.Combobox(self, width = 50, state="readonly") 
         self.varline.grid(column = 0, row = 1, sticky=tk.W, padx=5, pady=5) 
         self.varline['values'] = ['']
         self.varline.current(0)
         self.varline.bind("<<ComboboxSelected>>", lambda event: self.change(event))
-        root.bind('<Up>', lambda event : self.ds_up(event))
-        root.bind('<Down>', lambda event : self.ds_down(event))
-        root.bind('<space>', lambda event : self.ds_down(event))
-        root.bind('<Right>', lambda event : self.nextFile(event))
-        root.bind('<Left>', lambda event : self.prevFile(event))
-        root.bind('<b>', lambda event : self.baseline())
-        root.bind('<d>', lambda event : self.DreieckZoom())
+        self.bind_all('<Up>', lambda event : self.ds_up(event))
+        self.bind_all('<Down>', lambda event : self.ds_down(event))
+        self.bind_all('<space>', lambda event : self.ds_down(event))
+        self.bind_all('<Right>', lambda event : self.nextFile(event))
+        self.bind_all('<Left>', lambda event : self.prevFile(event))
+        self.bind_all('<b>', lambda event : self.baseline())
+        self.bind_all('<d>', lambda event : self.DreieckZoom())
         print(sys.argv)
         if len(sys.argv) > 1:
             self.filename = sys.argv[1]
             self.openDataFile()
         else :
            self.select_file()
+        self.focus_set()
         
         
 if __name__ == '__main__':
@@ -203,5 +218,5 @@ if __name__ == '__main__':
         windll.shcore.SetProcessDpiAwareness(1)
     finally:
         #keep the window displaying
-        root.mainloop()
+        app.mainloop()
 
