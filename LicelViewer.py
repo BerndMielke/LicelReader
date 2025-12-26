@@ -189,7 +189,7 @@ class App(tk.Tk):
         canvas.bind('<b>', lambda event: self.baseline())
         canvas.bind('<d>', lambda event: self.DreieckZoom())
         self.line1 = None
-        self.varline = ttk.Combobox(self, width = 50, state="readonly") 
+        self.varline = ttk.Combobox(self, width = 20, state="readonly") 
         self.varline.grid(column = 0, row = 1, sticky=tk.W, padx=5, pady=5) 
         self.varline['values'] = ['']
         self.varline.current(0)
