@@ -44,6 +44,18 @@ class App(tk.Tk):
         else :
             self.line1.set_xdata(x)
             self.line1.set_ydata(y)
+        if self.file.GlobalInfo.overflowDs >= 0 and self.file.dataSet[ds].dataType == 0 :
+            overflow = self.file.get_overflow_for_dataset(ds)
+            ovf_y = np.where(overflow != 0, y, np.nan)
+            if self.ovf_markers is None :
+                self.ovf_markers, = self.axes.plot(x, ovf_y, 'ro', markersize=4, fillstyle='none')
+            else :
+                self.ovf_markers.set_xdata(x)
+                self.ovf_markers.set_ydata(ovf_y)
+            self.ovf_markers.set_visible(True)
+        elif self.ovf_markers is not None :
+            self.ovf_markers.set_visible(False)
+
         ymin = np.min(y)
         ymax =  np.max(y) + 0.02 * (np.max(y) - np.min(y))    
         self.axes.set_ylim(ymin, ymax)
@@ -189,6 +201,7 @@ class App(tk.Tk):
         canvas.bind('<b>', lambda event: self.baseline())
         canvas.bind('<d>', lambda event: self.DreieckZoom())
         self.line1 = None
+        self.ovf_markers = None
         self.varline = ttk.Combobox(self, width = 20, state="readonly") 
         self.varline.grid(column = 0, row = 1, sticky=tk.W, padx=5, pady=5) 
         self.varline['values'] = ['']

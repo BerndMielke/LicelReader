@@ -28,6 +28,7 @@ class GlobalInfo:
     numShotsL2: int = 0
     repRateL2: int = 0
     numDataSets: int = 0
+    overflowDs: int = -1
 
     def getDescString(self) -> str:
         return (
@@ -168,6 +169,8 @@ class dataSet:
                 desc += "ASQR"
             case 3:
                 desc += "PCSQR"
+            case 5:
+                desc = "OVF"
             case _:
                 pass
         if self.dataType < 4 and self.Polarization != 'o':
@@ -234,11 +237,14 @@ class LicelFileReader:
     def _read_dataset_descriptors(self, fp: IO[bytes], encoding: str):
         """Read and parse dataset descriptor lines."""
         # read dataset descriptor lines
-        for _ in range(self.GlobalInfo.numDataSets):
+        for i in range(self.GlobalInfo.numDataSets):
             varline = fp.readline().decode(encoding)
             if not varline:
                 raise EOFError("Unexpected EOF while reading dataset descriptors")
-            self.dataSet.append(dataSet(varline))
+            ds = dataSet(varline)
+            if ds.dataType == 5:
+                self.GlobalInfo.overflowDs = i
+            self.dataSet.append(ds)
 
         # read blank/terminator line
         fp.readline()
@@ -300,6 +306,16 @@ class LicelFileReader:
 
         _term = fp.read(2)
         # term is bytes, typically b'\r\n' — not fatal if different
+    def get_overflow_for_dataset(self, ds_index: int) -> NDArray[np.float64]:
+        """Return overflow data for the given dataset index, or zeros if not available."""
+        if self.dataSet[ds_index].dataType != 0:
+            return np.zeros(self.dataSet[ds_index].numBins, dtype=np.float64)
+        if self.GlobalInfo.overflowDs >= 0 and self.GlobalInfo.overflowDs < len(self.dataSet):
+            analog_bit = sum(1 for i in range(ds_index) if self.dataSet[i].dataType == 0)
+            raw = self.dataSet[self.GlobalInfo.overflowDs].rawData
+            return np.where(raw & (1 << analog_bit), 1, 0).astype(np.float64)
+        else:
+            return np.zeros(self.dataSet[ds_index].numBins, dtype=np.float64)
 
 
 
