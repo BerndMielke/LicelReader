@@ -107,7 +107,11 @@ class App(tk.Tk):
     def openDataFile(self):
         self.file = LicelFileReader(self.filename)
         self.varline['values'] = self.file.shortDescr
-        self.varline.current(0)
+        #self.varline.current(0)
+        ds = self.varline.current()
+        if ds < 0 :
+            self.varline.current(0)
+            ds = 0
         self.draw_Data()
         self.lift()
         self.focus_force()
@@ -142,14 +146,14 @@ class App(tk.Tk):
          self.varline.current(ds)
          self.draw_Data()
     def nextFile(self,event):
-        head_tail = os.path.split(self.filename)
+        head_tail = os.path.split(os.path.abspath(self.filename))
         dir_content = os.listdir(head_tail[0])
         index = dir_content.index(head_tail[1])
         if  (index >= 0) and (index < len(dir_content) - 1):
             self.filename = os.path.join(head_tail[0], dir_content[index + 1])
         self.openDataFile()
     def prevFile(self,event):
-        head_tail = os.path.split(self.filename)
+        head_tail = os.path.split(os.path.abspath(self.filename))
         dir_content = os.listdir(head_tail[0])
         index = dir_content.index(head_tail[1])
         if  index >= 1 :
@@ -191,15 +195,6 @@ class App(tk.Tk):
         self.figure_canvas._tkcanvas.unbind('<Key>')
         toolbar.grid(column=1, row=2, sticky=tk.W, padx=5, pady=5)
         toolbar.config(takefocus=0)
-        # Bind keys to canvas as well to override matplotlib
-        canvas = self.figure_canvas.get_tk_widget()
-        canvas.bind('<Up>', lambda event: self.ds_up(event))
-        canvas.bind('<Down>', lambda event: self.ds_down(event))
-        canvas.bind('<space>', lambda event: self.ds_down(event))
-        canvas.bind('<Right>', lambda event: self.nextFile(event))
-        canvas.bind('<Left>', lambda event: self.prevFile(event))
-        canvas.bind('<b>', lambda event: self.baseline())
-        canvas.bind('<d>', lambda event: self.DreieckZoom())
         self.line1 = None
         self.ovf_markers = None
         self.varline = ttk.Combobox(self, width = 20, state="readonly") 
@@ -207,13 +202,16 @@ class App(tk.Tk):
         self.varline['values'] = ['']
         self.varline.current(0)
         self.varline.bind("<<ComboboxSelected>>", lambda event: self.change(event))
-        self.bind_all('<Up>', lambda event : self.ds_up(event))
-        self.bind_all('<Down>', lambda event : self.ds_down(event))
-        self.bind_all('<space>', lambda event : self.ds_down(event))
-        self.bind_all('<Right>', lambda event : self.nextFile(event))
-        self.bind_all('<Left>', lambda event : self.prevFile(event))
-        self.bind_all('<b>', lambda event : self.baseline())
-        self.bind_all('<d>', lambda event : self.DreieckZoom())
+        self.varline.bind('<Up>', lambda event: self.ds_up(event) or 'break')
+        self.varline.bind('<Down>', lambda event: self.ds_down(event) or 'break')
+        self.varline.bind('<space>', lambda event: self.ds_down(event) or 'break')
+        self.bind('<Up>', lambda event : self.ds_up(event))
+        self.bind('<Down>', lambda event : self.ds_down(event))
+        self.bind('<space>', lambda event : self.ds_down(event))
+        self.bind('<Right>', lambda event : self.nextFile(event))
+        self.bind('<Left>', lambda event : self.prevFile(event))
+        self.bind('<b>', lambda event : self.baseline())
+        self.bind('<d>', lambda event : self.DreieckZoom())
         print(sys.argv)
         if len(sys.argv) > 1:
             self.filename = sys.argv[1]
