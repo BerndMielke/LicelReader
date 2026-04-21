@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 
 
+import os
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
@@ -59,6 +60,7 @@ class App(tk.Tk):
         ymin = np.min(y)
         ymax =  np.max(y) + 0.02 * (np.max(y) - np.min(y))    
         self.axes.set_ylim(ymin, ymax)
+        self.axes.ticklabel_format(axis='y', style='plain', useOffset=False)
         self.axes.autoscale(enable=True, axis='x')
         L = self.axes.legend([self.line1], [self.file.dataSet[ds].getDescString()])
         plt.setp(L.texts, family='Consolas')
@@ -120,11 +122,19 @@ class App(tk.Tk):
         filetypes = (
             [('All files', '*.*')]
         )
+
+        initialdir = '/'
+        if getattr(self, 'filename', None):
+            initialdir = os.path.dirname(os.path.abspath(self.filename))
        
-        self.filename = fd.askopenfilename(
+        filename = fd.askopenfilename(
             title='Open a file',
-            initialdir='/',
+            initialdir=initialdir,
             filetypes=filetypes)
+        if not filename:
+            return
+
+        self.filename = filename
         self.openDataFile()
         
     def change(self, event):
