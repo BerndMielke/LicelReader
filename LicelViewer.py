@@ -61,7 +61,7 @@ class App(tk.Tk):
         ymax =  np.max(y) + 0.02 * (np.max(y) - np.min(y))    
         self.axes.set_ylim(ymin, ymax)
         self.axes.ticklabel_format(axis='y', style='plain', useOffset=False)
-        self.axes.autoscale(enable=True, axis='x')
+        self.axes.set_xlim(np.min(x), np.max(x))
         L = self.axes.legend([self.line1], [self.file.dataSet[ds].getDescString()])
         plt.setp(L.texts, family='Consolas')
         self.axes.set_title(self.filename)
