@@ -169,6 +169,8 @@ class dataSet:
                 desc += "ASQR"
             case 3:
                 desc += "PCSQR"
+            case 4:
+                desc = f"PM{spl[-1]} " if spl else self.descriptor
             case 5:
                 desc = "OVF"
             case _:
