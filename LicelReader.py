@@ -214,18 +214,28 @@ class LicelFileReader:
         self.firstline = fp.readline().decode(encoding)
         self.secondline = fp.readline().decode(encoding)
 
-        flsplit = self.firstline.split()
-        if len(flsplit) < 9:
+        # Use a regex so that Location may contain spaces.
+        # The fixed-format fields (two date+time pairs, then numeric fields) anchor the match.
+        _fl_re = re.match(
+            r'^(.*?)\s+'
+            r'(\d{2}/\d{2}/\d{4})\s+(\d{2}:\d{2}:\d{2})\s+'
+            r'(\d{2}/\d{2}/\d{4})\s+(\d{2}:\d{2}:\d{2})\s+'
+            r'(\d+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)'
+            r'(?:\s+([\d.]+))?'
+            r'\s*$',
+            self.firstline.strip()
+        )
+        if not _fl_re:
             raise ValueError(f"Invalid first header line: '{self.firstline.strip()}'")
-        self.GlobalInfo.Location = flsplit[0]
-        self.GlobalInfo.StartTime = flsplit[1] + ' ' + flsplit[2]
-        self.GlobalInfo.StopTime = flsplit[3] + ' ' + flsplit[4]
-        self.GlobalInfo.Height = int(flsplit[5])
-        self.GlobalInfo.Longitude = float(flsplit[6])
-        self.GlobalInfo.Latitude = float(flsplit[7])
-        self.GlobalInfo.Zenith = float(flsplit[8])
-        if len(flsplit) > 9:
-            self.GlobalInfo.Azimuth = float(flsplit[9])
+        self.GlobalInfo.Location = _fl_re.group(1)
+        self.GlobalInfo.StartTime = _fl_re.group(2) + ' ' + _fl_re.group(3)
+        self.GlobalInfo.StopTime  = _fl_re.group(4) + ' ' + _fl_re.group(5)
+        self.GlobalInfo.Height    = int(_fl_re.group(6))
+        self.GlobalInfo.Longitude = float(_fl_re.group(7))
+        self.GlobalInfo.Latitude  = float(_fl_re.group(8))
+        self.GlobalInfo.Zenith    = float(_fl_re.group(9))
+        if _fl_re.group(10) is not None:
+            self.GlobalInfo.Azimuth = float(_fl_re.group(10))
 
         slsplit = self.secondline.split()
         if len(slsplit) < 5:
